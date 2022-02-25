@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <tensorrt_yolox/tensorrt_yolox_node.hpp>
-
-#include <autoware_auto_perception_msgs/msg/object_classification.hpp>
-
 #include <algorithm>
+#include <autoware_auto_perception_msgs/msg/object_classification.hpp>
 #include <memory>
 #include <string>
+#include <tensorrt_yolox/tensorrt_yolox_node.hpp>
 #include <utility>
 #include <vector>
 
@@ -40,28 +38,29 @@ TrtYoloXNode::TrtYoloXNode(const rclcpp::NodeOptions & node_options)
   }
   trt_yolox_ = std::make_unique<tensorrt_yolox::TrtYoloX>(model_path, precision);
 
-  timer_ = rclcpp::create_timer(
-    this, get_clock(), 100ms, std::bind(&TrtYoloXNode::onConnect, this));
+  timer_ =
+    rclcpp::create_timer(this, get_clock(), 100ms, std::bind(&TrtYoloXNode::onConnect, this));
 
+  /*
   objects_pub_ =
     this->create_publisher<tier4_perception_msgs::msg::DetectedObjectsWithFeature>(
     "~/out/objects", 1);
+*/
   image_pub_ = image_transport::create_publisher(this, "~/out/image");
 }
 
 void TrtYoloXNode::onConnect()
 {
   using std::placeholders::_1;
-  if (objects_pub_->get_subscription_count() == 0 &&
+  if (
+    objects_pub_->get_subscription_count() == 0 &&
     objects_pub_->get_intra_process_subscription_count() == 0 &&
-    image_pub_.getNumSubscribers() == 0)
-  {
+    image_pub_.getNumSubscribers() == 0) {
     image_sub_.shutdown();
   } else if (!image_sub_) {
     image_sub_ = image_transport::create_subscription(
       this, "~/in/image", std::bind(&TrtYoloXNode::onImage, this, _1), "raw",
-      rmw_qos_profile_sensor_data
-    );
+      rmw_qos_profile_sensor_data);
   }
 }
 
@@ -87,6 +86,7 @@ void TrtYoloXNode::onImage(const sensor_msgs::msg::Image::ConstSharedPtr msg)
     return;
   }
   for (const auto & yolox_object : objects.at(0)) {
+    /*
     tier4_perception_msgs::msg::DetectedObjectWithFeature object;
     object.feature.roi.x_offset = yolox_object.x_offset;
     object.feature.roi.y_offset = yolox_object.y_offset;
@@ -110,6 +110,7 @@ void TrtYoloXNode::onImage(const sensor_msgs::msg::Image::ConstSharedPtr msg)
       object.object.classification.front().label = Label::MOTORCYCLE;
     }
     out_objects.feature_objects.push_back(object);
+    */
     const auto left = std::max(0, static_cast<int>(object.feature.roi.x_offset));
     const auto top = std::max(0, static_cast<int>(object.feature.roi.y_offset));
     const auto right =
@@ -122,8 +123,8 @@ void TrtYoloXNode::onImage(const sensor_msgs::msg::Image::ConstSharedPtr msg)
   }
   image_pub_.publish(in_image_ptr->toImageMsg());
 
-  out_objects.header = msg->header;
-  objects_pub_->publish(out_objects);
+  // out_objects.header = msg->header;
+  // objects_pub_->publish(out_objects);
 }
 
 bool TrtYoloXNode::readLabelFile(const std::string & label_path)

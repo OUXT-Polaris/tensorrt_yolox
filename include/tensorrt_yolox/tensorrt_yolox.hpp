@@ -17,12 +17,10 @@
 
 #include <cuda_utils/cuda_unique_ptr.hpp>
 #include <cuda_utils/stream_unique_ptr.hpp>
-#include <opencv2/opencv.hpp>
-
-#include <tensorrt_common/tensorrt_common.hpp>
-
 #include <memory>
+#include <opencv2/opencv.hpp>
 #include <string>
+#include <tensorrt_common/tensorrt_common.hpp>
 #include <vector>
 
 namespace tensorrt_yolox
