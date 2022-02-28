@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <algorithm>
-#include <autoware_auto_perception_msgs/msg/object_classification.hpp>
 #include <memory>
 #include <string>
 #include <tensorrt_yolox/tensorrt_yolox_node.hpp>
